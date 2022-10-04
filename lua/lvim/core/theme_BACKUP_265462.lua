@@ -96,10 +96,13 @@ M.setup = function()
   end
 
   theme.setup(lvim.builtin.theme.options)
+<<<<<<< HEAD
+=======
 
   require("lvim.core.lualine").setup()
 
   require("lvim.core.lir").icon_setup()
+>>>>>>> e5bcf01 (refactor: more deliberate reload (#3133))
 end
 
 return M
