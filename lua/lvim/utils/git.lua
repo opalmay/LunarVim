@@ -199,6 +199,11 @@ function M.get_git_branches()
   for _, branch in ipairs(results) do
     branch = branch:gsub("^%s*", "") -- Remove leading white space
     if branch ~= "" then
+      -- filter by remote branches
+      -- TODO:
+      if branch:match("^remotes") then
+        branch = branch:gsub("^remotes/origin/", "")
+      end
       table.insert(branches, branch)
     end
   end
