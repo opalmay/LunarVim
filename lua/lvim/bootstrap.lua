@@ -120,4 +120,16 @@ function M:update()
   end)
 end
 
+function M:update_minor_version()
+  require("lvim.core.log"):info "Trying to update LunarVim minor version..."
+
+  vim.schedule(function()
+    reload("lvim.utils.hooks").run_pre_update()
+    local ret = reload("lvim.utils.git").update_minor_version()
+    if ret then
+      reload("lvim.utils.hooks").run_post_update()
+    end
+  end)
+end
+
 return M

@@ -87,6 +87,47 @@ function M.update_base_lvim()
   return true
 end
 
+function M.update_minor_version()
+  Log:info "Checking for minor version updates"
+
+  if not vim.loop.fs_access(get_lvim_base_dir(), "w") then
+    Log:warn(fmt("Lunarvim update aborted! cannot write to %s", get_lvim_base_dir()))
+    return
+  end
+
+  if not safe_deep_fetch() then
+    return
+  end
+
+  local current_branch = M.get_lvim_branch()
+
+  -- check if the current branch is a release branch
+  local release_num = current_branch:match("^release%-(%d+)")
+  if not release_num then
+    Log:warn "You are not on a release branch, switching to a minor version is not possible"
+    return
+  end
+
+  -- check if any branch for a minor version exists
+  local minor_version_branches = {}
+  for _, branch in ipairs(M.get_git_branches()) do
+    local minor_version = branch:match("^release%-(%d+)%.(%d+)")
+    if minor_version and minor_version[1] == release_num then
+      table.insert(minor_version_branches, branch)
+    end
+  end
+
+  if #minor_version_branches == 0 then
+    Log:warn "No minor version found for current release"
+    return
+  end
+
+  -- find the latest minor version branch and switch to it
+  table.sort(minor_version_branches)
+  local latest_minor_version = minor_version_branches[#minor_version_branches]
+  M.switch_lvim_branch(latest_minor_version)
+end
+
 ---Switch Lunarvim to the specified development branch
 ---@param branch string
 function M.switch_lvim_branch(branch)
@@ -147,6 +188,22 @@ function M.get_lvim_version()
     lvim_version = "v" .. M.get_lvim_tag()
   end
   return lvim_version
+end
+
+---Get all git branches
+---@return table
+function M.get_git_branches()
+  local _, results = git_cmd { args = { "branch", "--all" } }
+
+  local branches = {}
+  for _, branch in ipairs(results) do
+    branch = branch:gsub("^%s*", "") -- Remove leading white space
+    if branch ~= "" then
+      table.insert(branches, branch)
+    end
+  end
+
+  return branches
 end
 
 return M

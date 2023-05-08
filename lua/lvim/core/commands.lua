@@ -63,6 +63,12 @@ M.defaults = {
     end,
   },
   {
+    name = "LvimUpdateMinorVersion",
+    fn = function()
+      require("lvim.bootstrap"):update_minor_version()
+    end,
+  },
+  {
     name = "LvimSyncCorePlugins",
     fn = function()
       require("lvim.plugin-loader").sync_core_plugins()
